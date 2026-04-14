@@ -15,7 +15,7 @@ jobs:
 
       - name: Extract project ZIP
         run: |
-          unzip GasTV-AndroidProject.zip
+          unzip GasTV-AndroidProject.zip || true
           echo "=== Isi folder ==="
           ls -la GasTVApp/
 
