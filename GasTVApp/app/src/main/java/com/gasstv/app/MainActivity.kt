@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
     private lateinit var swipeRefresh: SwipeRefreshLayout
 
-    private val TARGET_URL = "https://gasstv.pw"
+    private val TARGET_URL = "https://sbotv.live"
     private val FILE_CHOOSER_REQUEST = 1001
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
 
