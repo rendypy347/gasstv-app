@@ -18,6 +18,8 @@ jobs:
           unzip GasTV-AndroidProject.zip
           ls -la
 
+          cp GasTVApp/app/src/main/java/com/gasstv/app/MainActivity.kt GasTVApp/app/src/main/java/com/gasstv/app/MainActivity.kt || true
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
