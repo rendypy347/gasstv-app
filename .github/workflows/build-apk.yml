@@ -1,1 +1,53 @@
+name: Build GasTV APK
 
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract project ZIP
+        run: |
+          unzip GasTV-AndroidProject.zip
+          ls -la
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Make gradlew executable
+        run: |
+          cd GasTVApp
+          chmod +x gradlew 2>/dev/null || true
+
+      - name: Add gradlew if missing
+        run: |
+          cd GasTVApp
+          if [ ! -f gradlew ]; then
+            gradle wrapper --gradle-version=8.4
+          fi
+          chmod +x gradlew
+
+      - name: Build Debug APK
+        run: |
+          cd GasTVApp
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: GasTV-APK
+          path: GasTVApp/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
