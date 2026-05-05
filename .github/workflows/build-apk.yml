@@ -1,0 +1,71 @@
+name: Build DF21 LIVE APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract project ZIP (jika project di-zip)
+        run: |
+          if [ -f "DF21Live-AndroidProject.zip" ]; then
+            unzip -o DF21Live-AndroidProject.zip
+          fi
+          echo "=== Isi folder ==="
+          ls -la
+
+      - name: Tentukan project folder
+        id: project
+        run: |
+          if [ -d "DF21LiveApp" ]; then
+            echo "dir=DF21LiveApp" >> $GITHUB_OUTPUT
+          else
+            echo "dir=." >> $GITHUB_OUTPUT
+          fi
+
+      - name: Override MainActivity.kt jika ada di repo
+        run: |
+          DEST="${{ steps.project.outputs.dir }}/app/src/main/java/com/df21/live/MainActivity.kt"
+          if [ -f "MainActivity.kt" ]; then
+            echo "Copying MainActivity.kt from root repo..."
+            cp MainActivity.kt "$DEST"
+            echo "Done!"
+          else
+            echo "Memakai MainActivity.kt dari project"
+          fi
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Generate gradlew
+        run: |
+          cd ${{ steps.project.outputs.dir }}
+          if [ ! -f gradlew ]; then
+            gradle wrapper --gradle-version=8.4 --distribution-type=bin
+          fi
+          chmod +x gradlew
+
+      - name: Build Debug APK
+        run: |
+          cd ${{ steps.project.outputs.dir }}
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: DF21Live-APK
+          path: ${{ steps.project.outputs.dir }}/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
